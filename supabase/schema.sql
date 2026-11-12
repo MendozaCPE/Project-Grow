@@ -23,10 +23,15 @@ CREATE TABLE profiles (
 -- LAC Sessions table
 CREATE TABLE lac_sessions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  session_id TEXT NOT NULL UNIQUE,
   session_date DATE NOT NULL,
   session_no INTEGER NOT NULL,
   title TEXT NOT NULL,
+  region TEXT NOT NULL DEFAULT 'Region IV - CALABARZON',
+  division TEXT NOT NULL DEFAULT 'Batangas',
   locked BOOLEAN NOT NULL DEFAULT false,
+  assigned_teachers UUID[] DEFAULT '{}', -- Array of teacher IDs who can access this session
+  send_to_all BOOLEAN NOT NULL DEFAULT true, -- If true, all active teachers can see it
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(session_no)

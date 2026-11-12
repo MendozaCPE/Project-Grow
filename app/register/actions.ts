@@ -49,6 +49,7 @@ export async function registerUser(formData: FormData) {
         full_name: fullName,
         school: school,
       },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/login?confirmed=true`,
     },
   });
 

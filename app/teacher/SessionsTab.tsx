@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 type Session = {
@@ -23,8 +23,14 @@ type SessionsTabProps = {
   submissions: Submission[];
 };
 
+type StatusFilter = "all" | "submitted" | "pending" | "notStarted" | "failedToSubmit";
+type SortOrder = "newest" | "oldest" | "session";
+
 export default function SessionsTab({ sessions, submissions }: SessionsTabProps) {
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const router = useRouter();
 
   const getSessionStatus = (session: Session) => {
@@ -47,6 +53,83 @@ export default function SessionsTab({ sessions, submissions }: SessionsTabProps)
     
     return { status, statusColor, submission };
   };
+
+  // Calculate status counts
+  const statusCounts = useMemo(() => {
+    let submitted = 0;
+    let pending = 0;
+    let notStarted = 0;
+    let failedToSubmit = 0;
+
+    sessions.forEach((session) => {
+      const submission = submissions?.find((s) => s.session_id === session.id);
+      
+      if (!submission) {
+        notStarted++;
+      } else if (submission.status === "draft") {
+        if (session.locked) {
+          failedToSubmit++;
+        } else {
+          pending++;
+        }
+      } else {
+        submitted++;
+      }
+    });
+
+    return { submitted, pending, notStarted, failedToSubmit };
+  }, [sessions, submissions]);
+
+  // Filter and sort sessions
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+
+    const list = sessions.filter((s) => {
+      const submission = submissions?.find((sub) => sub.session_id === s.id);
+      
+      // Status filter
+      if (statusFilter !== "all") {
+        if (statusFilter === "submitted") {
+          if (!submission || submission.status !== "submitted") return false;
+        } else if (statusFilter === "pending") {
+          if (!submission || submission.status !== "draft" || s.locked) return false;
+        } else if (statusFilter === "notStarted") {
+          if (submission) return false;
+        } else if (statusFilter === "failedToSubmit") {
+          if (!s.locked || !submission || submission.status !== "draft") return false;
+        }
+      }
+
+      // Search query
+      if (!q) return true;
+      const title = s.title?.toLowerCase() || "";
+      const no = String(s.session_no ?? "");
+      return (
+        title.includes(q) ||
+        no.includes(q) ||
+        `session ${no}`.includes(q)
+      );
+    });
+
+    return list.sort((a, b) => {
+      if (sortOrder === "session") {
+        return a.session_no - b.session_no;
+      }
+      const diff =
+        new Date(a.session_date).getTime() - new Date(b.session_date).getTime();
+      return sortOrder === "newest" ? -diff : diff;
+    });
+  }, [sessions, submissions, query, statusFilter, sortOrder]);
+
+  const filters: { key: StatusFilter; label: string; count: number }[] = [
+    { key: "all", label: "All Sessions", count: sessions.length },
+    { key: "submitted", label: "Submitted", count: statusCounts.submitted },
+    { key: "pending", label: "Pending", count: statusCounts.pending },
+    { key: "notStarted", label: "Not Started", count: statusCounts.notStarted },
+    { key: "failedToSubmit", label: "Failed", count: statusCounts.failedToSubmit },
+  ];
+
+  const hasActiveFilters = query.trim() !== "" || statusFilter !== "all";
 
   const handleOpenModal = (session: Session) => {
     setSelectedSession(session);
@@ -273,13 +356,141 @@ export default function SessionsTab({ sessions, submissions }: SessionsTabProps)
 
       {/* Sessions List */}
       <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-md">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-1 h-8 bg-gradient-to-b from-[#E3B23C] to-[#C9962A] rounded-full" />
-          <h2 className="text-2xl font-bold text-[#2E2815]">LAC Sessions</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-1 h-8 bg-gradient-to-b from-[#E3B23C] to-[#C9962A] rounded-full" />
+            <h2 className="text-2xl font-bold text-[#2E2815]">LAC Sessions</h2>
+          </div>
+          <span className="px-3 py-1 bg-[#FBF6E4] text-[#8B7E6A] rounded-full text-sm font-semibold">
+            {filtered.length} of {sessions.length}
+          </span>
         </div>
 
-        <div className="space-y-3">
-          {sessions?.map((session) => {
+        {/* Search + Sort */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1">
+            <svg
+              className="w-4 h-4 text-[#8B7E6A] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
+              />
+            </svg>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by session title or number"
+              className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[#E3B23C]/30 bg-[#FBF6E4]/50 text-sm text-[#2E2815] placeholder:text-[#8B7E6A] focus:outline-none focus:ring-2 focus:ring-[#E3B23C]/50 focus:border-[#E3B23C]"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full text-[#8B7E6A] hover:bg-[#E3B23C]/20 transition-colors"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+            aria-label="Sort sessions"
+            className="py-2.5 px-3 rounded-xl border border-[#E3B23C]/30 bg-[#FBF6E4]/50 text-sm font-medium text-[#2E2815] focus:outline-none focus:ring-2 focus:ring-[#E3B23C]/50 focus:border-[#E3B23C]"
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="session">Session number</option>
+          </select>
+        </div>
+
+        {/* Status filters */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {filters.map((f) => {
+            const active = statusFilter === f.key;
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => setStatusFilter(f.key)}
+                aria-pressed={active}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors flex items-center gap-2 ${
+                  active
+                    ? "bg-[#E3B23C] text-[#2E2815] border-[#E3B23C]"
+                    : "bg-white text-[#5C5037] border-[#E3B23C]/30 hover:border-[#E3B23C]/60"
+                }`}
+              >
+                {f.label}
+                <span
+                  className={`text-xs px-1.5 py-0.5 rounded-full ${
+                    active ? "bg-white/40" : "bg-[#FBF6E4] text-[#8B7E6A]"
+                  }`}
+                >
+                  {f.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Sessions List */}
+        {filtered.length === 0 ? (
+          <div className="text-center py-10">
+            <svg
+              className="w-16 h-16 mx-auto text-gray-300 mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <p className="text-sm text-[#8B7E6A]">
+              {sessions.length === 0
+                ? "No LAC sessions available yet."
+                : "No sessions match your search."}
+            </p>
+            {hasActiveFilters && sessions.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setStatusFilter("all");
+                }}
+                className="mt-3 text-sm font-semibold text-[#E3B23C] hover:text-[#C9962A] transition-colors"
+              >
+                Clear search and filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((session) => {
             const { status, statusColor } = getSessionStatus(session);
             const isPending = status === "Pending";
 
@@ -345,13 +556,8 @@ export default function SessionsTab({ sessions, submissions }: SessionsTabProps)
               </button>
             );
           })}
-
-          {sessions?.length === 0 && (
-            <p className="text-sm text-[#8B7E6A] text-center py-8">
-              No LAC sessions available yet.
-            </p>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

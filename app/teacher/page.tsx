@@ -32,10 +32,12 @@ export default async function TeacherDashboard({
     redirect("/login");
   }
 
-  // Fetch all LAC sessions
+  // Fetch all LAC sessions that this teacher has access to
+  // After running the migration, this filters sessions by assignment
   const { data: sessions } = await supabase
     .from("lac_sessions")
     .select("*")
+    .or(`send_to_all.eq.true,assigned_teachers.cs.{"${user.id}"}`)
     .order("session_date", { ascending: false });
 
   // Fetch teacher's submissions
@@ -129,42 +131,74 @@ export default async function TeacherDashboard({
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-2xl transform -translate-x-1/4 translate-y-1/4" />
         
-        <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-6 flex-1">
-            {/* Large Logo on the Left */}
-            <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 flex-shrink-0">
-              <Image
-                src="/logo-2.png"
-                alt="School Logo"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
-            
-            {/* Text Content */}
-            <div className="flex-1">
-              <p className="text-sm sm:text-base text-[#5C5037] font-medium mb-1">
-                Welcome back,
-              </p>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#2E2815] mb-1">
-                {profile.full_name}! 👋
-              </h1>
-              <p className="text-sm sm:text-base text-[#2E2815] font-semibold">
+        <div className="relative">
+          {/* Mobile Layout */}
+          <div className="flex flex-col gap-3 lg:hidden">
+            {/* Top Row: Logo + School */}
+            <div className="flex items-center gap-3">
+              <div className="relative w-16 h-16 flex-shrink-0">
+                <Image
+                  src="/logo-2.png"
+                  alt="School Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <p className="text-sm text-[#2E2815] font-semibold flex-1">
                 {profile.school}
               </p>
             </div>
+            
+            {/* Bottom Row: Greeting + Name */}
+            <div>
+              <p className="text-sm text-[#5C5037] font-medium mb-1">
+                Welcome back,
+              </p>
+              <h1 className="text-xl font-bold text-[#2E2815]">
+                {profile.full_name}! 👋
+              </h1>
+            </div>
           </div>
-          
-          {/* Illustration */}
-          <div className="hidden lg:block relative w-40 h-32">
-            <div className="relative w-full h-full">
-              <Image
-                src="/logo-1.png"
-                alt="Illustration"
-                fill
-                className="object-contain opacity-20"
-              />
+
+          {/* Desktop Layout */}
+          <div className="hidden lg:flex items-center justify-between gap-4">
+            <div className="flex items-center gap-6 flex-1">
+              {/* Large Logo on the Left */}
+              <div className="relative w-28 h-28 md:w-32 md:h-32 flex-shrink-0">
+                <Image
+                  src="/logo-2.png"
+                  alt="School Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              
+              {/* Text Content */}
+              <div className="flex-1">
+                <p className="text-base text-[#5C5037] font-medium mb-1">
+                  Welcome back,
+                </p>
+                <h1 className="text-2xl lg:text-3xl font-bold text-[#2E2815] mb-1">
+                  {profile.full_name}! 👋
+                </h1>
+                <p className="text-base text-[#2E2815] font-semibold">
+                  {profile.school}
+                </p>
+              </div>
+            </div>
+            
+            {/* Illustration */}
+            <div className="relative w-40 h-32">
+              <div className="relative w-full h-full">
+                <Image
+                  src="/logo-1.png"
+                  alt="Illustration"
+                  fill
+                  className="object-contain opacity-20"
+                />
+              </div>
             </div>
           </div>
         </div>

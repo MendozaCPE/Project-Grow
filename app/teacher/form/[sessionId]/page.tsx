@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import FormComponent from "./FormComponent";
 import DocumentView from "./DocumentView";
-import DownloadModal from "./DownloadModal";
+import DownloadButton from "./DownloadButton";
 import type { LACFormAnswers } from "@/lib/lacForm4";
 
 type PageProps = {
@@ -91,6 +91,19 @@ export default async function FormPage({ params, searchParams }: PageProps) {
 
   return (
     <div className="max-w-4xl mx-auto p-3 sm:p-4 md:p-6">
+      {/* Back Button */}
+      <div className="mb-4">
+        <Link
+          href="/teacher"
+          className="inline-flex items-center gap-2 text-[#E3B23C] hover:text-[#C9962A] font-semibold transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Dashboard
+        </Link>
+      </div>
+
       {/* Header */}
       <div className="bg-[#FFFDF5] rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
         <div className="flex items-center gap-3 mb-3">
@@ -116,7 +129,7 @@ export default async function FormPage({ params, searchParams }: PageProps) {
               {/* Download Button in Header */}
               {submission?.id && (
                 <div className="flex-shrink-0">
-                  <DownloadModal submissionId={submission.id} className="!py-2 !px-4 text-sm" />
+                  <DownloadButton submissionId={submission.id} className="!py-2 !px-4 text-sm" />
                 </div>
               )}
             </div>
@@ -160,6 +173,8 @@ export default async function FormPage({ params, searchParams }: PageProps) {
         sessionNo={session.session_no}
         sessionTitle={session.title}
         sessionDate={session.session_date}
+        sessionRegion={session.region}
+        sessionDivision={session.division}
         teacherName={teacherProfile.full_name}
         isLocked={session.locked}
         isViewMode={isAdminView}

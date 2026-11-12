@@ -13,6 +13,9 @@ export const ratingOptions: { value: RatingValue; label: string; full: string }[
 export interface LACFormAnswers {
   // Header
   name: string;
+  region?: string;
+  division?: string;
+  sessionNo?: number;
   
   // Part A - Ratings (q1-q7)
   q1?: RatingValue;

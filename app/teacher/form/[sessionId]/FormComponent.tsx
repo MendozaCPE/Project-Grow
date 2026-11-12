@@ -11,13 +11,15 @@ import {
   validateFormAnswers,
 } from "@/lib/lacForm4";
 import { saveFormDraft, submitForm, unsubmitForm } from "./actions";
-import DownloadModal from "./DownloadModal";
+import DownloadButton from "./DownloadButton";
 
 type FormComponentProps = {
   sessionId: string;
   sessionNo: number;
   sessionTitle: string;
   sessionDate: string;
+  sessionRegion?: string;
+  sessionDivision?: string;
   teacherName: string;
   isLocked: boolean;
   isViewMode: boolean;
@@ -31,6 +33,8 @@ export default function FormComponent({
   sessionNo,
   sessionTitle,
   sessionDate,
+  sessionRegion = "Region IV - CALABARZON",
+  sessionDivision = "Batangas",
   teacherName,
   isLocked,
   isViewMode,
@@ -40,7 +44,12 @@ export default function FormComponent({
 }: FormComponentProps) {
   const router = useRouter();
   const [answers, setAnswers] = useState<LACFormAnswers>(
-    existingAnswers || { name: teacherName }
+    existingAnswers || { 
+      name: teacherName,
+      region: sessionRegion,
+      division: sessionDivision,
+      sessionNo: sessionNo
+    }
   );
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
@@ -430,39 +439,54 @@ export default function FormComponent({
           {/* Number */}
           <div>
             <label className="block text-sm font-semibold text-[#2E2815] mb-1">
-              Number
+              Number of LAC Sessions *
             </label>
             <input
-              type="text"
-              value={sessionNo.toString()}
-              disabled
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-base bg-gray-100 text-gray-600"
+              type="number"
+              value={answers.sessionNo !== undefined ? answers.sessionNo : sessionNo}
+              onChange={(e) => {
+                if (!isEditable) return;
+                setAnswers((prev) => ({ ...prev, sessionNo: parseInt(e.target.value) || sessionNo }));
+              }}
+              disabled={!isEditable}
+              min="1"
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-base focus:border-[#E3B23C] focus:outline-none disabled:bg-gray-100 disabled:text-gray-600"
             />
           </div>
 
           {/* Region */}
           <div>
             <label className="block text-sm font-semibold text-[#2E2815] mb-1">
-              Region
+              Region *
             </label>
             <input
               type="text"
-              value="IV-A CALABARZON"
-              disabled
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-base bg-gray-100 text-gray-600"
+              value={answers.region || sessionRegion}
+              onChange={(e) => {
+                if (!isEditable) return;
+                setAnswers((prev) => ({ ...prev, region: e.target.value }));
+              }}
+              disabled={!isEditable}
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-base focus:border-[#E3B23C] focus:outline-none disabled:bg-gray-100 disabled:text-gray-600"
+              placeholder="Region IV - CALABARZON"
             />
           </div>
 
           {/* Division */}
           <div className="sm:col-span-2">
             <label className="block text-sm font-semibold text-[#2E2815] mb-1">
-              Division
+              Division *
             </label>
             <input
               type="text"
-              value="Batangas"
-              disabled
-              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-base bg-gray-100 text-gray-600"
+              value={answers.division || sessionDivision}
+              onChange={(e) => {
+                if (!isEditable) return;
+                setAnswers((prev) => ({ ...prev, division: e.target.value }));
+              }}
+              disabled={!isEditable}
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-base focus:border-[#E3B23C] focus:outline-none disabled:bg-gray-100 disabled:text-gray-600"
+              placeholder="Batangas"
             />
           </div>
         </div>
@@ -644,7 +668,7 @@ export default function FormComponent({
       {/* Action Buttons */}
       <div className="bg-[#FFFDF5] rounded-lg shadow-md p-4 sm:p-6">
         {/* Locked Session Warning */}
-        {isLocked && (
+        {isLocked && !isViewMode && (
           <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mb-4">
             <div className="flex items-start gap-3">
               <svg
@@ -670,6 +694,32 @@ export default function FormComponent({
                 <p className="text-red-600 text-xs">
                   You can still edit and download your form for your records.
                 </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Admin View - Session Locked Warning */}
+        {isLocked && isViewMode && (
+          <div className="bg-gray-100 border-2 border-gray-400 rounded-lg p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <svg
+                className="w-6 h-6 text-gray-600 flex-shrink-0 mt-0.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+              <div>
+                <h3 className="text-gray-800 font-semibold">
+                  Session Locked
+                </h3>
               </div>
             </div>
           </div>
@@ -770,7 +820,7 @@ export default function FormComponent({
           )}
 
           {/* Download Button */}
-          {submissionId && <DownloadModal submissionId={submissionId} className="flex-1" />}
+          {submissionId && <DownloadButton submissionId={submissionId} className="flex-1" />}
         </div>
 
         {/* Status Info */}

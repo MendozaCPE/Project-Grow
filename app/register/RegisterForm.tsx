@@ -9,10 +9,12 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setLoading(true);
     setError(null);
 
+    const formData = new FormData(e.currentTarget);
     const result = await registerUser(formData);
 
     if (result.error) {
@@ -23,7 +25,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <form action={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Full Name */}
       <div className="group">
         <label htmlFor="full_name" className="block text-sm font-semibold text-[#2E2815] mb-2">
@@ -71,7 +73,7 @@ export default function RegisterForm() {
                      bg-gray-50 text-[#2E2815] placeholder-[#8B7E6A]
                      focus:outline-none focus:border-[#E3B23C] focus:bg-white focus:ring-4 focus:ring-[#E3B23C]/10
                      disabled:opacity-50 disabled:cursor-not-allowed text-base transition-all duration-200"
-            placeholder="Sampaguita Elementary School"
+            placeholder="Makaruahran Elementary School"
           />
         </div>
       </div>

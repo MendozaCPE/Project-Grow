@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 
 type Session = {
@@ -22,24 +22,88 @@ type SessionsListProps = {
   submissionMap: Map<string, Submission>;
 };
 
-export default function SessionsList({ sessions, submissionMap }: SessionsListProps) {
-  const [downloadModalOpen, setDownloadModalOpen] = useState<string | null>(null);
+type StatusFilter = "all" | "submitted" | "pending" | "notStarted" | "failedToSubmit";
+type SortOrder = "newest" | "oldest" | "session";
 
-  const handleDownload = (submissionId: string, type: "word" | "pdf") => {
-    const url = type === "word" 
-      ? `/api/export/${submissionId}` 
-      : `/api/export-pdf/${submissionId}`;
-    
-    // Create a temporary link and trigger download
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    setDownloadModalOpen(null);
-  };
+export default function SessionsList({ sessions, submissionMap }: SessionsListProps) {
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+
+  // Calculate status counts
+  const statusCounts = useMemo(() => {
+    let submitted = 0;
+    let pending = 0;
+    let notStarted = 0;
+    let failedToSubmit = 0;
+
+    sessions.forEach((session) => {
+      const submission = submissionMap.get(session.id);
+      
+      if (session.locked && !submission) {
+        failedToSubmit++;
+      } else if (session.locked && submission?.status === "draft") {
+        failedToSubmit++;
+      } else if (submission?.status === "submitted") {
+        submitted++;
+      } else if (submission?.status === "draft") {
+        pending++;
+      } else {
+        notStarted++;
+      }
+    });
+
+    return { submitted, pending, notStarted, failedToSubmit };
+  }, [sessions, submissionMap]);
+
+  // Filter and sort sessions
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+
+    const list = sessions.filter((s) => {
+      const submission = submissionMap.get(s.id);
+      
+      // Status filter
+      if (statusFilter !== "all") {
+        if (statusFilter === "submitted" && submission?.status !== "submitted") return false;
+        if (statusFilter === "pending" && (!submission || submission.status !== "draft" || s.locked)) return false;
+        if (statusFilter === "notStarted" && (submission || s.locked)) return false;
+        if (statusFilter === "failedToSubmit") {
+          const isFailed = (s.locked && !submission) || (s.locked && submission?.status === "draft");
+          if (!isFailed) return false;
+        }
+      }
+
+      // Search query
+      if (!q) return true;
+      const title = s.title?.toLowerCase() || "";
+      const no = String(s.session_no ?? "");
+      return (
+        title.includes(q) ||
+        no.includes(q) ||
+        `session ${no}`.includes(q)
+      );
+    });
+
+    return list.sort((a, b) => {
+      if (sortOrder === "session") {
+        return a.session_no - b.session_no;
+      }
+      const diff =
+        new Date(a.session_date).getTime() - new Date(b.session_date).getTime();
+      return sortOrder === "newest" ? -diff : diff;
+    });
+  }, [sessions, submissionMap, query, statusFilter, sortOrder]);
+
+  const filters: { key: StatusFilter; label: string; count: number }[] = [
+    { key: "all", label: "All Sessions", count: sessions.length },
+    { key: "submitted", label: "Submitted", count: statusCounts.submitted },
+    { key: "pending", label: "Pending", count: statusCounts.pending },
+    { key: "notStarted", label: "Not Started", count: statusCounts.notStarted },
+    { key: "failedToSubmit", label: "Failed", count: statusCounts.failedToSubmit },
+  ];
+
+  const hasActiveFilters = query.trim() !== "" || statusFilter !== "all";
 
   if (sessions.length === 0) {
     return (
@@ -70,8 +134,142 @@ export default function SessionsList({ sessions, submissionMap }: SessionsListPr
   }
 
   return (
-    <div className="space-y-3">
-      {sessions.map((session) => {
+    <div className="space-y-4">
+      {/* Search and Filters */}
+      <div className="bg-white rounded-xl p-4 shadow-md">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-[#2E2815]">My Sessions</h3>
+          <span className="px-3 py-1 bg-[#FBF6E4] text-[#8B7E6A] rounded-full text-sm font-semibold">
+            {filtered.length} of {sessions.length}
+          </span>
+        </div>
+
+        {/* Search + Sort */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1">
+            <svg
+              className="w-4 h-4 text-[#8B7E6A] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
+              />
+            </svg>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by session title or number"
+              className="w-full pl-9 pr-9 py-2.5 rounded-xl border border-[#E3B23C]/30 bg-[#FBF6E4]/50 text-sm text-[#2E2815] placeholder:text-[#8B7E6A] focus:outline-none focus:ring-2 focus:ring-[#E3B23C]/50 focus:border-[#E3B23C]"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full text-[#8B7E6A] hover:bg-[#E3B23C]/20 transition-colors"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+            aria-label="Sort sessions"
+            className="py-2.5 px-3 rounded-xl border border-[#E3B23C]/30 bg-[#FBF6E4]/50 text-sm font-medium text-[#2E2815] focus:outline-none focus:ring-2 focus:ring-[#E3B23C]/50 focus:border-[#E3B23C]"
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="session">Session number</option>
+          </select>
+        </div>
+
+        {/* Status filters */}
+        <div className="flex flex-wrap gap-2">
+          {filters.map((f) => {
+            const active = statusFilter === f.key;
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => setStatusFilter(f.key)}
+                aria-pressed={active}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors flex items-center gap-2 ${
+                  active
+                    ? "bg-[#E3B23C] text-[#2E2815] border-[#E3B23C]"
+                    : "bg-white text-[#5C5037] border-[#E3B23C]/30 hover:border-[#E3B23C]/60"
+                }`}
+              >
+                {f.label}
+                <span
+                  className={`text-xs px-1.5 py-0.5 rounded-full ${
+                    active ? "bg-white/40" : "bg-[#FBF6E4] text-[#8B7E6A]"
+                  }`}
+                >
+                  {f.count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Sessions List */}
+      {filtered.length === 0 ? (
+        <div className="card p-8 text-center">
+          <svg
+            className="w-16 h-16 mx-auto text-gray-300 mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          <p className="text-sm text-[#8B7E6A]">
+            {sessions.length === 0
+              ? "No LAC sessions yet. LAC sessions will appear here once your administrator creates them."
+              : "No sessions match your search."}
+          </p>
+          {hasActiveFilters && sessions.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                setStatusFilter("all");
+              }}
+              className="mt-3 text-sm font-semibold text-[#E3B23C] hover:text-[#C9962A] transition-colors"
+            >
+              Clear search and filters
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((session) => {
         const submission = submissionMap.get(session.id);
         let status: string;
         let statusColor: string;
@@ -148,7 +346,7 @@ export default function SessionsList({ sessions, submissionMap }: SessionsListPr
                 <div className="flex flex-wrap gap-2">
                   <Link
                     href={`/teacher/form/${session.id}`}
-                    className="flex-1 min-w-[100px] bg-[#E3B23C] hover:bg-[#C9962A] text-white text-center py-2 px-4 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1"
+                    className="flex-1 min-w-[100px] bg-gradient-to-r from-[#E3B23C] to-[#C9962A] hover:from-[#C9962A] hover:to-[#B8851F] text-white text-center py-2 px-4 rounded-lg text-sm font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,7 +361,7 @@ export default function SessionsList({ sessions, submissionMap }: SessionsListPr
                       <a
                         href={`/api/export/${submission.id}`}
                         download
-                        className="flex-1 min-w-[100px] bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg text-sm font-semibold transition-colors flex items-center justify-center gap-1"
+                        className="flex-1 min-w-[100px] bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-center py-2 px-4 rounded-lg text-sm font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -175,110 +373,11 @@ export default function SessionsList({ sessions, submissionMap }: SessionsListPr
                 </div>
               </div>
             </div>
-
-            {/* Download Modal */}
-            {submission && downloadModalOpen === submission.id && (
-              <div 
-                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 animate-fade-in"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDownloadModalOpen(null);
-                }}
-              >
-                <div 
-                  className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-slide-up"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {/* Header */}
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold text-[#2E2815]">Download Form</h3>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDownloadModalOpen(null);
-                      }}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-sm text-gray-600 mb-6">
-                    Choose your preferred format to download this LAC Form 4 submission.
-                  </p>
-
-                  {/* Download Options */}
-                  <div className="space-y-3">
-                    {/* Word Option */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDownload(submission.id, "word");
-                      }}
-                      className="w-full bg-[#2B579A] hover:bg-[#1e3d6b] text-white font-semibold py-4 px-6 rounded-xl transition-all hover:shadow-lg flex items-center justify-between group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
-                            <path d="M14 2v6h6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </div>
-                        <div className="text-left">
-                          <p className="font-bold">Microsoft Word</p>
-                          <p className="text-xs text-white/80">Editable .docx format</p>
-                        </div>
-                      </div>
-                      <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-
-                    {/* PDF Option */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDownload(submission.id, "pdf");
-                      }}
-                      className="w-full bg-[#D32F2F] hover:bg-[#9a0007] text-white font-semibold py-4 px-6 rounded-xl transition-all hover:shadow-lg flex items-center justify-between group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center">
-                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
-                            <path d="M14 2v6h6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </div>
-                        <div className="text-left">
-                          <p className="font-bold">PDF Document</p>
-                          <p className="text-xs text-white/80">Read-only .pdf format</p>
-                        </div>
-                      </div>
-                      <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {/* Cancel Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setDownloadModalOpen(null);
-                    }}
-                    className="w-full mt-4 py-2.5 px-4 text-gray-600 hover:text-gray-800 font-medium transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         );
       })}
+        </div>
+      )}
     </div>
   );
 }

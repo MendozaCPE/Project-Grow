@@ -8,11 +8,13 @@ export default function ForgotPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setLoading(true);
     setError(null);
     setSuccess(false);
 
+    const formData = new FormData(e.currentTarget);
     const result = await requestPasswordReset(formData);
 
     if (result.error) {
@@ -67,7 +69,7 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <form action={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5">
       {/* Email */}
       <div className="group">
         <label
