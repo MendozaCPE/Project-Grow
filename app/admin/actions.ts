@@ -237,3 +237,42 @@ export async function updateSession(formData: FormData) {
 
   return { success: true };
 }
+
+export async function deleteSession(sessionId: string) {
+  const supabase = await createClient();
+
+  // Verify user is admin
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Not authenticated");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (!profile || profile.role !== "admin") {
+    throw new Error("Unauthorized");
+  }
+
+  // Delete the session (submissions will be cascade deleted)
+  const { error } = await supabase
+    .from("lac_sessions")
+    .delete()
+    .eq("id", sessionId);
+
+  if (error) {
+    console.error("Error deleting session:", error);
+    throw new Error("Failed to delete session");
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/teacher");
+
+  return { success: true };
+}

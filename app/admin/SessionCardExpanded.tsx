@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { toggleSessionLock } from "./actions";
+import { toggleSessionLock, deleteSession } from "./actions";
 import EditSessionModal from "./EditSessionModal";
 
 type Teacher = {
@@ -60,6 +60,8 @@ export default function SessionCardExpanded({
   const [showDocsModal, setShowDocsModal] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<"teachers" | "edit">("teachers");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   const pct = teacherCount > 0 ? Math.round((submitted / teacherCount) * 100) : 0;
   const isOpen = !session.locked;
@@ -107,6 +109,19 @@ export default function SessionCardExpanded({
     }
   };
 
+  const handleDeleteSession = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteSession(session.id);
+      setShowDeleteModal(false);
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to delete session:", error);
+      alert("Failed to delete session. Please try again.");
+      setIsDeleting(false);
+    }
+  };
+
   // Create a map of teacher submissions
   const submissionMap = new Map(
     session.submissions
@@ -139,7 +154,98 @@ export default function SessionCardExpanded({
       }`}
     >
       <div className="p-4">
-        <div className="flex items-center gap-4">
+        {/* Mobile Layout */}
+        <div className="md:hidden">
+          <div className="flex items-start gap-3 mb-3">
+            {/* Session Number Badge */}
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-[#E3B23C] to-[#C9962A] flex items-center justify-center text-white font-bold shadow-md">
+              {session.session_no}
+            </div>
+
+            {/* Title and Status */}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-[#2E2815] mb-1">
+                {session.title}
+              </h3>
+              <span
+                className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                  isOpen ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {isOpen ? "Open" : "Locked"}
+              </span>
+            </div>
+          </div>
+
+          {/* Date */}
+          <p className="text-xs text-[#8B7E6A] mb-3 pl-15">
+            <span className="font-semibold">Session Date:</span> {formattedDate}
+          </p>
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-4 gap-2">
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="flex items-center justify-center p-2.5 rounded-lg text-sm font-semibold bg-[#E3B23C] hover:bg-[#C9962A] text-[#2E2815] transition-colors"
+              title="Edit session"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+
+            {submitted > 0 && (
+              <button
+                onClick={() => setShowDocsModal(true)}
+                className="flex items-center justify-center p-2.5 rounded-lg text-sm font-semibold bg-[#E3B23C] hover:bg-[#C9962A] text-[#2E2815] transition-colors"
+                title="View all documents"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </button>
+            )}
+
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="flex items-center justify-center p-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white transition-all shadow-sm hover:shadow-md"
+              title="Delete session"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+
+            <button
+              onClick={handleLock}
+              disabled={isLocking}
+              className={`flex items-center justify-center p-2.5 rounded-lg text-sm font-semibold transition-colors ${
+                isOpen
+                  ? "bg-red-100 hover:bg-red-200 text-red-700"
+                  : "bg-green-100 hover:bg-green-200 text-green-700"
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+              title={isOpen ? "Lock session" : "Unlock session"}
+            >
+              {isLocking ? (
+                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {isOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                  )}
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop Layout */}
+        <div className="hidden md:flex items-center gap-4">
           <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-[#E3B23C] to-[#C9962A] flex items-center justify-center text-white font-bold shadow-md">
             {session.session_no}
           </div>
@@ -198,6 +304,23 @@ export default function SessionCardExpanded({
                 <span className="hidden md:inline">View Docs</span>
               </button>
             )}
+
+            {/* Delete Button */}
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white transition-all shadow-sm hover:shadow-md"
+              title="Delete session"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              <span className="hidden lg:inline">Delete</span>
+            </button>
 
             {/* Lock/Unlock Button */}
             <button
@@ -730,6 +853,143 @@ export default function SessionCardExpanded({
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-slide-up">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-6 h-6 text-red-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-[#2E2815]">Delete Session?</h3>
+                  <p className="text-sm text-[#2E2815]/70 mt-1">This action cannot be undone</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Content */}
+            <div className="px-6 py-4">
+              <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-4">
+                <p className="text-sm text-red-800 font-medium mb-2">
+                  You are about to delete:
+                </p>
+                <div className="bg-white rounded-lg p-3 border border-red-200">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 bg-[#E3B23C] rounded-lg flex items-center justify-center">
+                      <span className="text-lg font-bold text-[#2E2815]">
+                        {session.session_no}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-[#2E2815] mb-1">
+                        {session.title}
+                      </h4>
+                      <p className="text-sm text-[#2E2815]/70">
+                        {formattedDate}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-sm text-[#2E2815]/80">
+                <p className="flex items-start gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>All <strong>{session.submissions?.filter(s => !s.deleted_at).length || 0} submissions</strong> for this session will be permanently deleted</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>Teachers will no longer see this session in their dashboard</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <svg className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>This action <strong>cannot be reversed</strong></span>
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 flex gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+                className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-[#2E2815] font-semibold rounded-lg transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteSession}
+                disabled={isDeleting}
+                className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isDeleting ? (
+                  <>
+                    <svg
+                      className="animate-spin h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                    Delete Session
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

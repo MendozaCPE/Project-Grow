@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
 
 type SidebarProps = {
@@ -12,8 +12,11 @@ type SidebarProps = {
 
 export default function Sidebar({ userRole, userName }: SidebarProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [clickedLink, setClickedLink] = useState<string | null>(null);
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const currentTab = searchParams.get('tab');
 
   const teacherLinks = [
@@ -32,8 +35,29 @@ export default function Sidebar({ userRole, userName }: SidebarProps) {
 
   const links = userRole === "admin" ? adminLinks : teacherLinks;
 
+  const handleLinkClick = (href: string) => {
+    setClickedLink(href);
+    setIsOpen(false);
+    startTransition(() => {
+      router.push(href);
+    });
+  };
+
   return (
     <>
+      {/* Loading Overlay */}
+      {isPending && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[60] flex items-center justify-center animate-fade-in">
+          <div className="bg-white rounded-2xl p-6 shadow-2xl flex flex-col items-center gap-4">
+            <div className="relative w-16 h-16">
+              <div className="absolute inset-0 border-4 border-[#E3B23C]/20 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-[#E3B23C] rounded-full border-t-transparent animate-spin"></div>
+            </div>
+            <p className="text-[#2E2815] font-semibold">Loading...</p>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Arrow Toggle Button - Sticks to middle side */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -107,14 +131,17 @@ export default function Sidebar({ userRole, userName }: SidebarProps) {
                 pathname === linkPath && 
                 (linkHasTab ? currentTab === linkTab : !currentTab);
               
+              const isLoading = isPending && clickedLink === link.href;
+              
               return (
-                <Link
+                <button
                   key={link.href}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => handleLinkClick(link.href)}
+                  disabled={isPending}
                   className={`
-                    flex items-center gap-3 px-4 py-3 rounded-xl
+                    w-full flex items-center gap-3 px-4 py-3 rounded-xl
                     transition-all duration-200 group
+                    ${isPending ? "opacity-50 cursor-wait" : ""}
                     ${
                       isActive
                         ? "bg-gradient-to-r from-[#E3B23C] to-[#F3DC94] text-[#2E2815] shadow-md"
@@ -122,16 +149,20 @@ export default function Sidebar({ userRole, userName }: SidebarProps) {
                     }
                   `}
                 >
-                  <svg
-                    className={`w-5 h-5 ${isActive ? "text-[#2E2815]" : "text-[#8B7E6A] group-hover:text-[#E3B23C]"}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
-                  </svg>
+                  {isLoading ? (
+                    <div className="w-5 h-5 border-2 border-[#2E2815]/20 border-t-[#2E2815] rounded-full animate-spin" />
+                  ) : (
+                    <svg
+                      className={`w-5 h-5 ${isActive ? "text-[#2E2815]" : "text-[#8B7E6A] group-hover:text-[#E3B23C]"}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={link.icon} />
+                    </svg>
+                  )}
                   <span className="font-semibold">{link.label}</span>
-                </Link>
+                </button>
               );
             })}
           </nav>

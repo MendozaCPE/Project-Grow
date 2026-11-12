@@ -426,7 +426,7 @@ export default function SessionsTab({ sessions, submissions }: SessionsTabProps)
         </div>
 
         {/* Status filters */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide">
           {filters.map((f) => {
             const active = statusFilter === f.key;
             return (
@@ -435,7 +435,7 @@ export default function SessionsTab({ sessions, submissions }: SessionsTabProps)
                 type="button"
                 onClick={() => setStatusFilter(f.key)}
                 aria-pressed={active}
-                className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors flex items-center gap-2 ${
+                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors flex items-center gap-2 ${
                   active
                     ? "bg-[#E3B23C] text-[#2E2815] border-[#E3B23C]"
                     : "bg-white text-[#5C5037] border-[#E3B23C]/30 hover:border-[#E3B23C]/60"

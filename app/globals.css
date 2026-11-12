@@ -294,3 +294,13 @@ input[type="radio"] {
 ::-webkit-scrollbar-thumb:hover {
   background: #C9962A;
 }
+
+/* Hide scrollbar utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
