@@ -39,6 +39,7 @@ export default async function AdminViewSubmission({
       ),
       lac_sessions (
         id,
+        uuid,
         session_no,
         session_date,
         title,
@@ -163,6 +164,7 @@ export default async function AdminViewSubmission({
 
         {/* Form Component in Read-Only Mode */}
         <FormComponent
+          sessionUuid={session?.uuid || ""}
           sessionId={session?.id || ""}
           sessionNo={session?.session_no || 0}
           sessionTitle={session?.title || ""}

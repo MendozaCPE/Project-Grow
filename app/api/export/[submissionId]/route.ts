@@ -97,7 +97,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     const ratings = ["sd", "d", "n", "a", "sa"];
     for (let i = 1; i <= 7; i++) {
       const questionKey = `q${i}` as keyof LACFormAnswers;
-      const selectedRating = answers[questionKey]?.toLowerCase();
+      const selectedRating = String(answers[questionKey] || "").toLowerCase();
 
       ratings.forEach((rating) => {
         const key = `q${i}_${rating}`;
