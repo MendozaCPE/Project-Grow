@@ -1,0 +1,85 @@
+LAC FORM 4 - ALL PLACEHOLDERS
+Copy these EXACTLY as shown (including the {{ and }})
+
+HEADER PLACEHOLDERS:
+{{name}}
+{{session_id}}
+{{date}}
+{{session_no}}
+{{region}}
+{{division}}
+
+QUESTION 1 RATINGS + COMMENT:
+{{q1_sd}}
+{{q1_d}}
+{{q1_n}}
+{{q1_a}}
+{{q1_sa}}
+{{c1}}
+
+QUESTION 2 RATINGS + COMMENT:
+{{q2_sd}}
+{{q2_d}}
+{{q2_n}}
+{{q2_a}}
+{{q2_sa}}
+{{c2}}
+
+QUESTION 3 RATINGS + COMMENT:
+{{q3_sd}}
+{{q3_d}}
+{{q3_n}}
+{{q3_a}}
+{{q3_sa}}
+{{c3}}
+
+QUESTION 4 RATINGS + COMMENT:
+{{q4_sd}}
+{{q4_d}}
+{{q4_n}}
+{{q4_a}}
+{{q4_sa}}
+{{c4}}
+
+QUESTION 5 RATINGS + COMMENT:
+{{q5_sd}}
+{{q5_d}}
+{{q5_n}}
+{{q5_a}}
+{{q5_sa}}
+{{c5}}
+
+QUESTION 6 RATINGS + COMMENT:
+{{q6_sd}}
+{{q6_d}}
+{{q6_n}}
+{{q6_a}}
+{{q6_sa}}
+{{c6}}
+
+QUESTION 7 RATINGS + COMMENT:
+{{q7_sd}}
+{{q7_d}}
+{{q7_n}}
+{{q7_a}}
+{{q7_sa}}
+{{c7}}
+
+PART B - REFLECTION:
+{{b1}}
+{{b2}}
+{{b3}}
+
+INSTRUCTIONS:
+1. Open this file in Notepad
+2. Copy each placeholder (Ctrl+C)
+3. Paste into Word document in the correct cell
+4. Make sure NO formatting is applied
+5. Each placeholder should be EXACTLY as shown
+6. Don't add spaces inside the {{ }}
+
+TOTAL: 52 placeholders
+- 6 header fields
+- 35 rating fields (5 per question × 7 questions)
+- 7 comment fields (c1 through c7)
+- 3 reflection fields (b1, b2, b3)

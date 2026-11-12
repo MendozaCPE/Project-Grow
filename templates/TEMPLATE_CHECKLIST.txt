@@ -1,0 +1,132 @@
+LAC FORM 4 TEMPLATE - PLACEHOLDER CHECKLIST
+═══════════════════════════════════════════════════════════
+
+Copy this list and check off each placeholder as you add it to your template.
+Use Find & Replace in Word to replace actual values with placeholders.
+
+HEADER SECTION (7 placeholders)
+─────────────────────────────────
+[ ] {{name}}
+[ ] {{session_id}}
+[ ] {{date}}
+[ ] {{session_no}}
+[ ] {{region}}
+[ ] {{division}}
+
+PART A - QUESTION 1 (12 placeholders)
+─────────────────────────────────
+[ ] {{q1_sd}}
+[ ] {{q1_d}}
+[ ] {{q1_n}}
+[ ] {{q1_a}}
+[ ] {{q1_sa}}
+[ ] {{c1}}
+
+PART A - QUESTION 2 (6 placeholders)
+─────────────────────────────────
+[ ] {{q2_sd}}
+[ ] {{q2_d}}
+[ ] {{q2_n}}
+[ ] {{q2_a}}
+[ ] {{q2_sa}}
+[ ] {{c2}}
+
+PART A - QUESTION 3 (6 placeholders)
+─────────────────────────────────
+[ ] {{q3_sd}}
+[ ] {{q3_d}}
+[ ] {{q3_n}}
+[ ] {{q3_a}}
+[ ] {{q3_sa}}
+[ ] {{c3}}
+
+PART A - QUESTION 4 (6 placeholders)
+─────────────────────────────────
+[ ] {{q4_sd}}
+[ ] {{q4_d}}
+[ ] {{q4_n}}
+[ ] {{q4_a}}
+[ ] {{q4_sa}}
+[ ] {{c4}}
+
+PART A - QUESTION 5 (6 placeholders)
+─────────────────────────────────
+[ ] {{q5_sd}}
+[ ] {{q5_d}}
+[ ] {{q5_n}}
+[ ] {{q5_a}}
+[ ] {{q5_sa}}
+[ ] {{c5}}
+
+PART A - QUESTION 6 (6 placeholders)
+─────────────────────────────────
+[ ] {{q6_sd}}
+[ ] {{q6_d}}
+[ ] {{q6_n}}
+[ ] {{q6_a}}
+[ ] {{q6_sa}}
+[ ] {{c6}}
+
+PART A - QUESTION 7 (6 placeholders)
+─────────────────────────────────
+[ ] {{q7_sd}}
+[ ] {{q7_d}}
+[ ] {{q7_n}}
+[ ] {{q7_a}}
+[ ] {{q7_sa}}
+[ ] {{c7}}
+
+PART B - REFLECTION (3 placeholders)
+─────────────────────────────────
+[ ] {{b1}}
+[ ] {{b2}}
+[ ] {{b3}}
+
+═══════════════════════════════════════════════════════════
+TOTAL: 52 PLACEHOLDERS
+═══════════════════════════════════════════════════════════
+
+QUICK VERIFICATION:
+─────────────────────────────────
+After creating template:
+
+1. Open template in Word
+2. Press Ctrl+F (Find)
+3. Search for "{{"
+4. Should find exactly 52 instances
+5. Verify no placeholder has spaces: {{ name }} is WRONG, {{name}} is RIGHT
+6. Save as LAC-FORM-4-template.docx in templates/ folder
+
+TESTING:
+─────────────────────────────────
+1. Fill out a test form in the app
+2. Click Download Word
+3. Open downloaded document
+4. Search for "{{" - should find 0 instances
+5. Verify all data filled correctly
+6. Check that exactly one X appears per question
+
+COMMON MISTAKES:
+─────────────────────────────────
+❌ {{ name }}    - Has spaces
+❌ {name}        - Single braces
+❌ [[name]]      - Wrong brackets
+❌ <name>        - Wrong brackets
+❌ $name$        - Wrong delimiters
+✅ {{name}}      - CORRECT
+
+RATING CHECKBOX FORMAT:
+─────────────────────────────────
+Good format:  [{{q1_sd}}] SD  [{{q1_d}}] D  [{{q1_n}}] N  [{{q1_a}}] A  [{{q1_sa}}] SA
+
+Will output:  [ ] SD  [ ] D  [ ] N  [X] A  [ ] SA
+
+Alternative:  {{q1_sd}} SD  {{q1_d}} D  {{q1_n}} N  {{q1_a}} A  {{q1_sa}} SA
+
+Will output:  SD  D  N  X A  SA
+
+Choose the format that looks best in your layout.
+
+═══════════════════════════════════════════════════════════
+Ready to create your template! Good luck! 🎉
+═══════════════════════════════════════════════════════════

@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Project GROW Color Theme */
+  --color-page-bg: #FBF6E4;
+  --color-card-bg: #FFFDF5;
+  --color-primary: #E3B23C;
+  --color-primary-hover: #C9962A;
+  --color-selected: #F3DC94;
+  --color-text: #2E2815;
+  
+  /* Tailwind compatibility */
+  --color-background: var(--color-page-bg);
+  --color-foreground: var(--color-text);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: #FBF6E4;
+  color: #2E2815;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  font-size: 16px; /* Prevent iOS zoom on focus */
+}
+
+/* Ensure inputs are at least 16px to prevent iOS zoom */
+input,
+textarea,
+select,
+button {
+  font-size: 16px;
+}
+
+/* Smooth scrolling */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Touch targets - minimum 48px */
+button,
+a,
+input[type="checkbox"],
+input[type="radio"] {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #E3B23C;
+  outline-offset: 2px;
+}
+
+/* Responsive tables */
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
