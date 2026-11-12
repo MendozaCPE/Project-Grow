@@ -73,7 +73,7 @@ export default function RegisterForm() {
                      bg-gray-50 text-[#2E2815] placeholder-[#8B7E6A]
                      focus:outline-none focus:border-[#E3B23C] focus:bg-white focus:ring-4 focus:ring-[#E3B23C]/10
                      disabled:opacity-50 disabled:cursor-not-allowed text-base transition-all duration-200"
-            placeholder="Makaruahran Elementary School"
+            placeholder="Malaruhatan Elementary School"
           />
         </div>
       </div>
