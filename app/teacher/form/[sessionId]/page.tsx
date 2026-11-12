@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import FormComponent from "./FormComponent";
 import DocumentView from "./DocumentView";
+import DownloadModal from "./DownloadModal";
 import type { LACFormAnswers } from "@/lib/lacForm4";
 
 type PageProps = {
@@ -99,16 +100,26 @@ export default async function FormPage({ params, searchParams }: PageProps) {
             </span>
           </div>
           <div className="flex-1">
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-[#2E2815]">
-              {session.title}
-            </h1>
-            <p className="text-xs sm:text-sm text-[#2E2815]/70">
-              {new Date(session.session_date).toLocaleDateString("en-US", {
-                month: "long",
-                day: "numeric",
-                year: "numeric",
-              })}
-            </p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-[#2E2815]">
+                  {session.title}
+                </h1>
+                <p className="text-xs sm:text-sm text-[#2E2815]/70">
+                  {new Date(session.session_date).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+              {/* Download Button in Header */}
+              {submission?.id && (
+                <div className="flex-shrink-0">
+                  <DownloadModal submissionId={submission.id} className="!py-2 !px-4 text-sm" />
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -143,70 +154,7 @@ export default async function FormPage({ params, searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Download Buttons - Show for view mode */}
-      {(isViewMode || isAdminView) && submission?.id && (
-        <div className="max-w-4xl mx-auto mb-4 px-3 sm:px-4 md:px-6">
-          <div className="bg-[#FFFDF5] rounded-lg shadow-md p-4">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex-1 min-w-[200px]">
-                <p className="text-sm font-semibold text-[#2E2815]">
-                  Download Options
-                </p>
-                <p className="text-xs text-[#2E2815]/70">
-                  Export this form as Word document or PDF
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {/* Download Word */}
-                <a
-                  href={`/api/export/${submission.id}`}
-                  download
-                  className="bg-[#2B579A] hover:bg-[#1e3d6b] text-white font-semibold py-2 px-4 rounded-lg transition-colors min-h-[48px] flex items-center text-sm"
-                >
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  Word (.docx)
-                </a>
-                
-                {/* Download PDF */}
-                <a
-                  href={`/api/export-pdf/${submission.id}`}
-                  download
-                  className="bg-[#D32F2F] hover:bg-[#9a0007] text-white font-semibold py-2 px-4 rounded-lg transition-colors min-h-[48px] flex items-center text-sm"
-                >
-                  <svg
-                    className="w-4 h-4 mr-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
-                  PDF (.pdf)
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Form Component - Always shown, just in view or edit mode */}
+      {/* Form Component - Locked sessions cannot be submitted */}
       <FormComponent
         sessionId={sessionId}
         sessionNo={session.session_no}
@@ -214,7 +162,7 @@ export default async function FormPage({ params, searchParams }: PageProps) {
         sessionDate={session.session_date}
         teacherName={teacherProfile.full_name}
         isLocked={session.locked}
-        isViewMode={isViewMode || isAdminView}
+        isViewMode={isAdminView}
         existingAnswers={submission?.answers as LACFormAnswers}
         submissionId={submission?.id}
         submissionStatus={submission?.status}

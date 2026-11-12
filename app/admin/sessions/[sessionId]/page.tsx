@@ -113,12 +113,29 @@ export default async function SessionDetailPage({
             </span>
           </div>
           <div className="flex-1">
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-[#2E2815] mb-1">
-              {session.title}
-            </h1>
-            <p className="text-xs sm:text-sm text-[#2E2815]/70 mb-2">
-              {formattedDate}
-            </p>
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <div className="flex-1">
+                <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-[#2E2815] mb-1">
+                  {session.title}
+                </h1>
+                <p className="text-xs sm:text-sm text-[#2E2815]/70 mb-2">
+                  {formattedDate}
+                </p>
+              </div>
+              {/* Download All Button */}
+              {filteredSubmissions && filteredSubmissions.length > 0 && (
+                <button
+                  onClick={() => alert('Download all functionality - will download all submissions as ZIP')}
+                  className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 text-sm"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span className="hidden sm:inline">Download All</span>
+                  <span className="sm:hidden">All</span>
+                </button>
+              )}
+            </div>
             <div className="flex flex-wrap gap-2">
               {session.locked && (
                 <span className="px-3 py-1 bg-gray-500 text-white text-xs font-semibold rounded-full">

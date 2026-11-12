@@ -20,29 +20,29 @@ export default async function Header() {
   }
 
   return (
-    <header className="w-full bg-[#FFFDF5] border-b-2 border-[#E3B23C]/20 sticky top-0 z-50 backdrop-blur-sm bg-[#FFFDF5]/95 shadow-sm">
+    <header className="w-full border-b-2 border-[#E3B23C]/20 sticky top-0 z-50 backdrop-blur-sm shadow-sm">
       <div className="max-w-7xl mx-auto px-3 py-3 sm:px-4 sm:py-4">
         <div className="flex items-center gap-2 sm:gap-4">
           {/* Logo Container - Responsive with animation */}
           <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0 animate-fade-in">
-            <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-lg overflow-hidden shadow-md ring-2 ring-[#E3B23C]/20 transition-transform hover:scale-105">
+            <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-lg overflow-hidden shadow-md ring-2 ring-[#E3B23C]/20 transition-transform hover:scale-105">
               <Image
                 src="/logo-1.png"
                 alt="School Logo 1"
                 fill
                 className="object-contain"
                 priority
-                sizes="(max-width: 640px) 40px, (max-width: 768px) 48px, 64px"
+                sizes="(max-width: 640px) 56px, (max-width: 768px) 64px, (max-width: 1024px) 80px, 96px"
               />
             </div>
-            <div className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-lg overflow-hidden shadow-md ring-2 ring-[#E3B23C]/20 transition-transform hover:scale-105">
+            <div className="relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-lg overflow-hidden shadow-md ring-2 ring-[#E3B23C]/20 transition-transform hover:scale-105">
               <Image
                 src="/logo-2.png"
                 alt="School Logo 2"
                 fill
                 className="object-contain"
                 priority
-                sizes="(max-width: 640px) 40px, (max-width: 768px) 48px, 64px"
+                sizes="(max-width: 640px) 56px, (max-width: 768px) 64px, (max-width: 1024px) 80px, 96px"
               />
             </div>
           </div>

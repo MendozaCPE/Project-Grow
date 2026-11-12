@@ -240,26 +240,6 @@ export default function DocumentView({
       {/* Action Buttons */}
       <div className="p-6 bg-gray-50 border-t-2 border-gray-200 flex gap-3 justify-center print:hidden">
         <button
-          onClick={() => window.print()}
-          className="bg-[#E3B23C] hover:bg-[#C9962A] text-[#2E2815] font-semibold py-3 px-8 rounded-lg transition-colors min-h-[48px] inline-flex items-center"
-        >
-          <svg
-            className="w-5 h-5 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
-            />
-          </svg>
-          Print Document
-        </button>
-
-        <button
           onClick={() => window.history.back()}
           className="bg-gray-300 hover:bg-gray-400 text-[#2E2815] font-semibold py-3 px-8 rounded-lg transition-colors min-h-[48px] inline-flex items-center"
         >
