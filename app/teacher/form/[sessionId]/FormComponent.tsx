@@ -14,6 +14,7 @@ import { saveFormDraft, submitForm, unsubmitForm } from "./actions";
 import DownloadButton from "./DownloadButton";
 
 type FormComponentProps = {
+  sessionUuid: string;
   sessionId: string;
   sessionNo: number;
   sessionTitle: string;
@@ -29,6 +30,7 @@ type FormComponentProps = {
 };
 
 export default function FormComponent({
+  sessionUuid,
   sessionId,
   sessionNo,
   sessionTitle,
@@ -80,7 +82,7 @@ export default function FormComponent({
     setIsSaving(true);
 
     try {
-      await saveFormDraft(sessionId, answers, submissionId);
+      await saveFormDraft(sessionUuid, answers, submissionId);
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
     } catch (error) {
@@ -89,7 +91,7 @@ export default function FormComponent({
     } finally {
       setIsSaving(false);
     }
-  }, [sessionId, answers, submissionId, isEditable, isSaving]);
+  }, [sessionUuid, answers, submissionId, isEditable, isSaving]);
 
   const handleRatingChange = (questionId: string, value: RatingValue) => {
     if (!isEditable) return;
@@ -137,7 +139,7 @@ export default function FormComponent({
     setErrors([]);
 
     try {
-      await saveFormDraft(sessionId, answers, submissionId);
+      await saveFormDraft(sessionUuid, answers, submissionId);
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
     } catch (error) {
@@ -198,7 +200,7 @@ export default function FormComponent({
     setMissingFields(new Set());
 
     try {
-      await submitForm(sessionId, answers, submissionId);
+      await submitForm(sessionUuid, answers, submissionId);
       // Show success modal instead of immediately redirecting
       setShowSuccessModal(true);
     } catch (error) {
@@ -221,7 +223,7 @@ export default function FormComponent({
     setErrors([]);
 
     try {
-      await unsubmitForm(submissionId, sessionId);
+      await unsubmitForm(submissionId, sessionUuid);
       router.refresh();
     } catch (error) {
       console.error("Unsubmit failed:", error);
@@ -413,7 +415,7 @@ export default function FormComponent({
             </label>
             <input
               type="text"
-              value={`LAC-${sessionNo}`}
+              value={sessionId}
               disabled
               className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-base bg-gray-100 text-gray-600"
             />

@@ -169,7 +169,8 @@ export default async function FormPage({ params, searchParams }: PageProps) {
 
       {/* Form Component - Locked sessions cannot be submitted */}
       <FormComponent
-        sessionId={sessionId}
+        sessionUuid={sessionId}
+        sessionId={session.session_id}
         sessionNo={session.session_no}
         sessionTitle={session.title}
         sessionDate={session.session_date}

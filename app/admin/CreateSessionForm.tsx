@@ -174,10 +174,11 @@ export default function CreateSessionForm({ teachers }: CreateSessionFormProps) 
                     type="text"
                     name="session_id"
                     required
+                    maxLength={255}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base focus:border-[#E3B23C] focus:outline-none focus:ring-2 focus:ring-[#E3B23C]/20 transition-all"
-                    placeholder="e.g., LAC-2024-001"
+                    placeholder="Any unique identifier (e.g., LAC-2024-001, Session-A, etc.)"
                   />
-                  <p className="text-xs text-[#8B7E6A] mt-1">Enter a unique identifier for this session</p>
+                  <p className="text-xs text-[#8B7E6A] mt-1">Enter any unique identifier - you can use letters, numbers, and special characters</p>
                 </div>
 
                 <div>
