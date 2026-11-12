@@ -24,10 +24,10 @@ type SessionsListProps = {
 export default function SessionsList({ sessions, submissionMap }: SessionsListProps) {
   if (sessions.length === 0) {
     return (
-      <div className="bg-[#FFFDF5] rounded-lg shadow-md p-6 sm:p-8 text-center">
-        <div className="text-[#2E2815]/40 mb-2">
+      <div className="card p-8 sm:p-12 text-center animate-fade-in">
+        <div className="inline-block p-6 bg-[#E3B23C]/10 rounded-full mb-4">
           <svg
-            className="w-16 h-16 mx-auto mb-4"
+            className="w-16 h-16 text-[#E3B23C] mx-auto"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -35,15 +35,15 @@ export default function SessionsList({ sessions, submissionMap }: SessionsListPr
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={1.5}
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-[#2E2815] mb-2">
+        <h3 className="text-lg font-bold text-[#2E2815] mb-2">
           No LAC Sessions Yet
         </h3>
-        <p className="text-sm text-[#2E2815]/70">
+        <p className="text-sm text-[#8B7E6A]">
           LAC sessions will appear here once your administrator creates them.
         </p>
       </div>

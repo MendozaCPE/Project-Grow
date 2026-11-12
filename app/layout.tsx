@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { connection } from "next/server";
 import "./globals.css";
-import Header from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "Project GROW - LAC Form 4",
@@ -37,14 +36,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Force dynamic rendering - required for cookies() in Header
+  // Force dynamic rendering
   await connection();
   
   return (
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col">
-        <Header />
-        <main className="flex-1">{children}</main>
+        {children}
       </body>
     </html>
   );
