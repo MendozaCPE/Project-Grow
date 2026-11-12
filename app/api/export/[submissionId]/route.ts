@@ -41,7 +41,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     `
     )
     .eq("id", submissionId)
-    .is("deleted_at", null)
+    .is("deleted_at", null as any)
     .single();
 
   if (submissionError || !submission) {
@@ -141,7 +141,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     // 5. Return as download
     const filename = `LAC-Form-4_${teacherName.replace(/\s+/g, "_")}_${filenameDatePart}.docx`;
 
-    return new NextResponse(buffer, {
+    return new NextResponse(buffer as BodyInit, {
       headers: {
         "Content-Type":
           "application/vnd.openxmlformats-officedocument.wordprocessingml.document",

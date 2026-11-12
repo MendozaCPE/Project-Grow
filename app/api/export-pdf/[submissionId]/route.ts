@@ -72,7 +72,7 @@ export async function GET(
     const doc = new PDFDocument({ margin: 50, size: "LETTER" });
     const chunks: Buffer[] = [];
 
-    doc.on("data", (chunk) => chunks.push(chunk));
+    doc.on("data", (chunk: Buffer) => chunks.push(chunk));
 
     // Header
     doc.fontSize(16).font("Helvetica-Bold").text("LAC FORM 4", { align: "center" });
