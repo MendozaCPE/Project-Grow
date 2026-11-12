@@ -10,6 +10,18 @@ type Teacher = {
   school: string | null;
 };
 
+type Submission = {
+  id: string;
+  status: string;
+  deleted_at: string | null;
+  teacher_id: string;
+  teacher: {
+    id: string;
+    full_name: string;
+    school: string;
+  } | null;
+};
+
 type Session = {
   id: string;
   session_id: string;
@@ -21,11 +33,7 @@ type Session = {
   locked: boolean;
   send_to_all: boolean;
   assigned_teachers: string[];
-  submissions: Array<{
-    id: string;
-    status: string;
-    deleted_at: string | null;
-  }>;
+  submissions: Submission[];
 };
 
 type LACSessionsTabProps = {
