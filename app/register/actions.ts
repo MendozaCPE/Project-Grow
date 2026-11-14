@@ -50,6 +50,8 @@ export async function registerUser(formData: FormData) {
         school: school,
       },
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/login?confirmed=true`,
+      // Skip email confirmation to avoid rate limits
+      // Note: This only works if "Enable email confirmations" is disabled in Supabase settings
     },
   });
 
@@ -71,14 +73,13 @@ export async function registerUser(formData: FormData) {
     return { error: "Failed to create account. Please try again." };
   }
 
-  // Check if email confirmation is required
-  if (data.user && !data.session) {
-    // Email confirmation required
-    return redirect("/register/check-email");
+  // With auto-confirmation enabled, users should have a session immediately
+  if (data.session) {
+    // User is auto-confirmed and logged in
+    // Redirect to login to properly route based on role
+    redirect("/login?registered=true");
   }
 
-  // Success - user is logged in, redirect based on role
-  // The profile was created by the database trigger
-  // Redirect to login to fetch profile and route correctly
+  // Fallback: if somehow no session, still redirect to login
   redirect("/login?registered=true");
 }

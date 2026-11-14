@@ -27,6 +27,10 @@ export default function CreateSessionForm({ teachers }: CreateSessionFormProps) 
     title: "",
     recipients: 0
   });
+  
+  // Form state to avoid hydration issues
+  const [region, setRegion] = useState("");
+  const [division, setDivision] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -62,6 +66,8 @@ export default function CreateSessionForm({ teachers }: CreateSessionFormProps) 
       setSendToAll(true);
       setSelectedTeachers(new Set());
       setSearchQuery("");
+      setRegion("");
+      setDivision("");
       
       // Reset form
       (e.target as HTMLFormElement).reset();
@@ -143,6 +149,8 @@ export default function CreateSessionForm({ teachers }: CreateSessionFormProps) 
                     setSendToAll(true);
                     setSelectedTeachers(new Set());
                     setSearchQuery("");
+                    setRegion("");
+                    setDivision("");
                   }}
                   className="text-[#2E2815]/70 hover:text-[#2E2815] p-2 rounded-lg hover:bg-white/30 transition-colors"
                 >
@@ -229,7 +237,9 @@ export default function CreateSessionForm({ teachers }: CreateSessionFormProps) 
                       type="text"
                       name="region"
                       required
-                      defaultValue="Region IV - CALABARZON"
+                      value={region}
+                      onChange={(e) => setRegion(e.target.value)}
+                      placeholder="e.g., Region IV - CALABARZON"
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base focus:border-[#E3B23C] focus:outline-none focus:ring-2 focus:ring-[#E3B23C]/20 transition-all"
                     />
                   </div>
@@ -242,7 +252,9 @@ export default function CreateSessionForm({ teachers }: CreateSessionFormProps) 
                       type="text"
                       name="division"
                       required
-                      defaultValue="Batangas"
+                      value={division}
+                      onChange={(e) => setDivision(e.target.value)}
+                      placeholder="e.g., Batangas"
                       className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-base focus:border-[#E3B23C] focus:outline-none focus:ring-2 focus:ring-[#E3B23C]/20 transition-all"
                     />
                   </div>
