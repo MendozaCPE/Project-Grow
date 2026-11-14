@@ -312,12 +312,12 @@ export default async function TeacherDashboard({
                   </div>
                 )}
                 <div className="flex items-center gap-4">
-                  <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-md ${
+                  <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-md text-xs ${
                     isOngoing 
                       ? "bg-gradient-to-br from-[#E3B23C] to-[#C9962A] animate-pulse" 
                       : "bg-gradient-to-br from-[#E3B23C] to-[#C9962A]"
                   }`}>
-                    {session.session_no}
+                    {session.session_id}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-[#2E2815] truncate">{session.title}</h3>

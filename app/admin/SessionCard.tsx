@@ -50,8 +50,8 @@ export default function SessionCard({
       }`}
     >
       <div className="flex items-center gap-4">
-        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-[#E3B23C] to-[#C9962A] flex items-center justify-center text-white font-bold shadow-md">
-          {session.session_no}
+        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-[#E3B23C] to-[#C9962A] flex items-center justify-center text-white font-bold shadow-md text-xs">
+          {session.session_id}
         </div>
 
         <div className="flex-1 min-w-0">
@@ -231,8 +231,8 @@ export default function SessionCard({
               {/* Session Info */}
               <div className="bg-gray-50 rounded-xl p-4 mb-4">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-[#E3B23C] rounded-lg flex items-center justify-center text-white font-bold">
-                    {session.session_no}
+                  <div className="w-10 h-10 bg-[#E3B23C] rounded-lg flex items-center justify-center text-white font-bold text-xs">
+                    {session.session_id}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-semibold text-[#2E2815] truncate">

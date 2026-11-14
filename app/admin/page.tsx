@@ -381,7 +381,13 @@ export default async function AdminDashboard({
             const subs = liveSubs(session);
             const submitted = subs.filter((x: any) => x.status === "submitted").length;
             const drafts = subs.filter((x: any) => x.status === "draft").length;
-            const notStarted = Math.max(teachers - submitted - drafts, 0);
+            
+            // Calculate the correct number of assigned teachers for this session
+            const assignedTeacherCount = session.send_to_all 
+              ? teachers 
+              : (session.assigned_teachers || []).length;
+            
+            const notStarted = Math.max(assignedTeacherCount - submitted - drafts, 0);
 
             return (
               <SessionCard
@@ -389,7 +395,7 @@ export default async function AdminDashboard({
                 session={session}
                 submitted={submitted}
                 notStarted={notStarted}
-                teachers={teachers}
+                teachers={assignedTeacherCount}
                 formattedDate={fmtDate(session.session_date)}
               />
             );
