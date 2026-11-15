@@ -94,7 +94,7 @@ export default async function FormPage({ params, searchParams }: PageProps) {
       {/* Back Button */}
       <div className="mb-4">
         <Link
-          href="/teacher"
+          href={isAdminView && isAdmin ? "/admin" : "/teacher"}
           className="inline-flex items-center gap-2 text-[#E3B23C] hover:text-[#C9962A] font-semibold transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
