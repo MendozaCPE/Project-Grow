@@ -132,7 +132,7 @@ export default function SubmissionsList({
                   <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
                       <Link
-                        href={`/teacher/form/${sessionId}?view=true&admin=true&submissionId=${submission.id}`}
+                        href={`/admin/view/${submission.id}`}
                         className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-1"
                         title="View Submission"
                       >
@@ -218,7 +218,7 @@ export default function SubmissionsList({
 
               <div className="flex flex-col sm:flex-row gap-2">
                 <Link
-                  href={`/teacher/form/${sessionId}?view=true&admin=true&submissionId=${submission.id}`}
+                  href={`/admin/view/${submission.id}`}
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg text-center text-sm transition-colors min-h-[48px] flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
